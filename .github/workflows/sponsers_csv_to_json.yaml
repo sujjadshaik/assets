@@ -9,7 +9,7 @@ on:
     inputs:
       csv_url:
         description: 'URL of the CSV file'
-        required: true
+        required: false
         default: 'https://assets.publishing.service.gov.uk/media/67936e867b75412c254f4af1/2025-01-24_-_Worker_and_Temporary_Worker.csv'
 
 jobs:
@@ -32,4 +32,19 @@ jobs:
 
     - name: Run CSV to JSON conversion
       run: |
-        python uk-sponsers/sponsers-json.py "${{ github.event.inputs.csv_url }}"
+        mkdir -p uk-sponsers/json
+        python uk-sponsers/sponsers-json.py "${{ inputs.csv_url }}"
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit and push changes
+      if: (github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event_name == 'push'))
+      run: |
+        git add uk-sponsers/json/*.json
+        git commit -m "Add converted JSON file"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
