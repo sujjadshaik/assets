@@ -32,4 +32,18 @@ jobs:
 
     - name: Run CSV to JSON conversion
       run: |
+        mkdir -p uk-sponsers/json
         python uk-sponsers/sponsers-json.py "${{ github.event.inputs.csv_url }}"
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit and push changes
+      run: |
+        git add uk-sponsers/json/*.json
+        git commit -m "Add converted JSON file"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
