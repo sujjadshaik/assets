@@ -33,7 +33,7 @@ jobs:
     - name: Run CSV to JSON conversion
       run: |
         mkdir -p uk-sponsers/json
-        python uk-sponsers/sponsers-json.py "${{ github.event.inputs.csv_url }}"
+        python uk-sponsers/sponsers-json.py "${{ inputs.csv_url }}"
 
     - name: Configure Git
       run: |
