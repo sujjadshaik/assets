@@ -59,6 +59,20 @@ class SponsorAnalytics:
         # Organizations by rating type
         rating_counts = Counter(item['typeRating'] for item in self.data)
         
+        # Detailed rating analysis
+        rating_categories = defaultdict(int)
+        rating_grades = defaultdict(int)
+        
+        for item in self.data:
+            rating = item['typeRating']
+            # Split rating into category and grade if possible
+            parts = rating.split('-')
+            if len(parts) > 1:
+                category = parts[0].strip()
+                grade = parts[1].strip()
+                rating_categories[category] += 1
+                rating_grades[grade] += 1
+        
         # Companies with multiple entries (potential multi-branch)
         company_frequency = Counter(item['companyName'] for item in self.data)
         multi_branch_companies = {
@@ -69,6 +83,12 @@ class SponsorAnalytics:
         
         return {
             "rating_distribution": dict(rating_counts),
+            "rating_analysis": {
+                "categories": dict(sorted(rating_categories.items(), key=lambda x: x[1], reverse=True)),
+                "grades": dict(sorted(rating_grades.items(), key=lambda x: x[1], reverse=True)),
+                "total_rated_companies": len(rating_counts),
+                "most_common_rating": rating_counts.most_common(1)[0] if rating_counts else None
+            },
             "multi_branch_companies": dict(sorted(multi_branch_companies.items(), 
                                                 key=lambda x: x[1], 
                                                 reverse=True)[:10])
